@@ -6,6 +6,8 @@
 #include "CollectItemActor.h"
 #include "SurvivalGameState.h"
 #include "ItemSpawner.h"
+#include "TimerManager.h"
+#include "SurvivalGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -57,12 +59,26 @@ void ACollectItemActor::OnItemOverlap(
 			GameState->AddCollectedCount();
 		}
 
-		if (OwnerSpawner)
-		{
-			OwnerSpawner->SpawnItem();
-		}
+		AItemSpawner* SavedSpawner = OwnerSpawner;
 
 		Destroy();
+
+		if (SavedSpawner)
+		{
+			FTimerHandle SpawnTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(
+				SpawnTimerHandle,
+				[SavedSpawner]()
+				{
+					if (IsValid(SavedSpawner))
+					{
+						SavedSpawner->SpawnItem();
+					}
+				},
+				0.1f,
+				false
+			);
+		}
 	}
 
 }

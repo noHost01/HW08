@@ -53,23 +53,50 @@ void AItemSpawner::SpawnItem()
 		return;
 	}
 
-	int32 RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
-	AItemSpawnPoint* SelectedPoint = SpawnPoints[RandomIndex];
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride =
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	if (SelectedPoint)
+	for (int32 TryCount = 0; TryCount < SpawnPoints.Num(); TryCount++)
 	{
+		int32 RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+		AItemSpawnPoint* SelectedPoint = SpawnPoints[RandomIndex];
+
+		if (!SelectedPoint)
+		{
+			continue;
+		}
+
+		FVector SpawnLocation = SelectedPoint->GetActorLocation();
+		SpawnLocation.Z += 80.0f;
+
+		FRotator SpawnRotation = SelectedPoint->GetActorRotation();
+
 		ACollectItemActor* SpawnedItem = GetWorld()->SpawnActor<ACollectItemActor>(
 			ItemClass,
-			SelectedPoint->GetActorLocation(),
-			SelectedPoint->GetActorRotation()
+			SpawnLocation,
+			SpawnRotation,
+			SpawnParams
 		);
 
 		if (SpawnedItem)
 		{
 			SpawnedItem->SetOwnerSpawner(this);
+
+			UE_LOG(LogTemp, Warning, TEXT("Item Spawned Success! Index: %d Location: %s"),
+				RandomIndex,
+				*SpawnLocation.ToString()
+			);
+
+			return;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Item Spawned at Point Index: %d"), RandomIndex);
+		UE_LOG(LogTemp, Error, TEXT("Item Spawn Failed! Retry... Index: %d Location: %s"),
+			RandomIndex,
+			*SpawnLocation.ToString()
+		);
 	}
+
+	UE_LOG(LogTemp, Error, TEXT("All Spawn Attempts Failed!"));
 }
 

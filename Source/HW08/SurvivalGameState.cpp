@@ -27,6 +27,12 @@ void ASurvivalGameState::AddCollectedCount()
 
 void ASurvivalGameState::StartNextWave()
 {
+	if (CurrentWave >= 3)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("===== LEVEL CLEAR ====="));
+		return;
+	}
+
 	CurrentWave++;
 	CollectedCount = 0;
 
@@ -37,11 +43,6 @@ void ASurvivalGameState::StartNextWave()
 	else if (CurrentWave == 3)
 	{
 		TargetCollectCount = 15;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("All Waves Clear!"));
-		return;
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Wave %d Start! Target: %d"), CurrentWave, TargetCollectCount);

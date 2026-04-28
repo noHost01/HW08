@@ -4,6 +4,7 @@
 
 
 #include "SurvivalPlayer.h"
+#include "SurvivalGameMode.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -127,6 +128,16 @@ void ASurvivalPlayer::TakeDamageFromActor(int32 DamageAmount)
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Player HP: %d"), CurrentHP);
+
+	if (CurrentHP <= 0)
+	{
+		ASurvivalGameMode* GameMode = GetWorld()->GetAuthGameMode<ASurvivalGameMode>();
+
+		if (GameMode)
+		{
+			GameMode->GameOver();
+		}
+	}
 }
 
 int32 ASurvivalPlayer::GetCurrentHP() const

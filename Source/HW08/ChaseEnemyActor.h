@@ -1,3 +1,5 @@
+// ChaseEnemyActor.h
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
@@ -6,24 +8,39 @@
 #include "GameFramework/Character.h"
 #include "ChaseEnemyActor.generated.h"
 
+class USphereComponent;
+
 UCLASS()
 class HW08_API AChaseEnemyActor : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AChaseEnemyActor();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+	float MoveSpeed = 250.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+	int32 DamageAmount = 10;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
+	FVector StartLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
+	USphereComponent* DamageCollision;
+
+	UFUNCTION()
+	void OnEnemyOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
 };
