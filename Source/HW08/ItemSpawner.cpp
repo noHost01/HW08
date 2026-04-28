@@ -1,27 +1,75 @@
+// ItemSpawner.cpp
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ItemSpawner.h"
+#include "ItemSpawnPoint.h"
+#include "CollectItemActor.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 
-// Sets default values
 AItemSpawner::AItemSpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	PrimaryActorTick.bCanEverTick = false;
 }
 
-// Called when the game starts or when spawned
 void AItemSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	FindSpawnPoints();
+	SpawnItem();
 }
 
-// Called every frame
-void AItemSpawner::Tick(float DeltaTime)
+void AItemSpawner::FindSpawnPoints()
 {
-	Super::Tick(DeltaTime);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AItemSpawnPoint::StaticClass(), FoundActors);
 
+	for (AActor* Actor : FoundActors)
+	{
+		AItemSpawnPoint* SpawnPoint = Cast<AItemSpawnPoint>(Actor);
+		if (SpawnPoint)
+		{
+			SpawnPoints.Add(SpawnPoint);
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("SpawnPoint Count: %d"), SpawnPoints.Num());
+}
+
+void AItemSpawner::SpawnItem()
+{
+	if (!ItemClass)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ItemClass is not set!"));
+		return;
+	}
+
+	if (SpawnPoints.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No SpawnPoints found!"));
+		return;
+	}
+
+	int32 RandomIndex = FMath::RandRange(0, SpawnPoints.Num() - 1);
+	AItemSpawnPoint* SelectedPoint = SpawnPoints[RandomIndex];
+
+	if (SelectedPoint)
+	{
+		ACollectItemActor* SpawnedItem = GetWorld()->SpawnActor<ACollectItemActor>(
+			ItemClass,
+			SelectedPoint->GetActorLocation(),
+			SelectedPoint->GetActorRotation()
+		);
+
+		if (SpawnedItem)
+		{
+			SpawnedItem->SetOwnerSpawner(this);
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Item Spawned at Point Index: %d"), RandomIndex);
+	}
 }
 

@@ -1,27 +1,79 @@
+// CollectItemActor.cpp
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CollectItemActor.h"
+#include "SurvivalGameState.h"
+#include "ItemSpawner.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "SurvivalPlayer.h"
 
-// Sets default values
 ACollectItemActor::ACollectItemActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
+	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
+	SetRootComponent(Collision);
+
+	Collision->InitSphereRadius(50.0f);
+	Collision->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(Collision);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	OwnerSpawner = nullptr;
 }
 
-// Called when the game starts or when spawned
 void ACollectItemActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &ACollectItemActor::OnItemOverlap);
 }
 
-// Called every frame
-void ACollectItemActor::Tick(float DeltaTime)
+void ACollectItemActor::OnItemOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult
+)
 {
-	Super::Tick(DeltaTime);
+	ASurvivalPlayer* Player = Cast<ASurvivalPlayer>(OtherActor);
 
+	if (Player)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Collect Item! ScoreValue: %d"), ScoreValue);
+
+		ASurvivalGameState* GameState = GetWorld()->GetGameState<ASurvivalGameState>();
+
+		if (GameState)
+		{
+			GameState->AddCollectedCount();
+		}
+
+		if (OwnerSpawner)
+		{
+			OwnerSpawner->SpawnItem();
+		}
+
+		Destroy();
+	}
+
+}
+
+int32 ACollectItemActor::GetScoreValue() const
+{
+	return ScoreValue;
+}
+
+void ACollectItemActor::SetOwnerSpawner(AItemSpawner* Spawner)
+{
+	OwnerSpawner = Spawner;
 }
 

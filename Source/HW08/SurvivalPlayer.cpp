@@ -84,6 +84,8 @@ void ASurvivalPlayer::Move(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
+	// UE_LOG(LogTemp, Warning, TEXT("Move Input: X=%f Y=%f"), MovementVector.X, MovementVector.Y);
+
 	if (Controller)
 	{
 		const FRotator ControlRotation = Controller->GetControlRotation();
@@ -101,8 +103,8 @@ void ASurvivalPlayer::Look(const FInputActionValue& Value)
 {
 	FVector2D LookVector = Value.Get<FVector2D>();
 
-	AddControllerYawInput(LookVector.X);
-	AddControllerPitchInput(LookVector.Y);
+	AddControllerYawInput(LookVector.X * YawSensitivity);
+	AddControllerPitchInput(LookVector.Y * PitchSensitivity);
 }
 
 void ASurvivalPlayer::StartJump(const FInputActionValue& Value)

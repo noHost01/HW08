@@ -32,6 +32,13 @@ class HW08_API ASurvivalPlayer : public ACharacter
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 		UCameraComponent* Camera;
 
+		// 카메라 회전율
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+		float YawSensitivity = 0.7f;
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+		float PitchSensitivity = 0.5f;
+
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 		UInputMappingContext* DefaultMappingContext;
 
