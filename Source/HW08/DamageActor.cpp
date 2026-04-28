@@ -1,27 +1,51 @@
+// DamageActor.cpp
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "DamageActor.h"
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "SurvivalPlayer.h"
 
-// Sets default values
 ADamageActor::ADamageActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
+	Collision = CreateDefaultSubobject<UBoxComponent>(TEXT("Collision"));
+	SetRootComponent(Collision);
+
+	Collision->SetBoxExtent(FVector(50.0f, 50.0f, 50.0f));
+	Collision->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(Collision);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-// Called when the game starts or when spawned
 void ADamageActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &ADamageActor::OnDamageOverlap);
 }
 
-// Called every frame
-void ADamageActor::Tick(float DeltaTime)
+void ADamageActor::OnDamageOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult
+)
 {
-	Super::Tick(DeltaTime);
+	ASurvivalPlayer* Player = Cast<ASurvivalPlayer>(OtherActor);
 
+	if (Player)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DamageActor Hit! Damage: %d"), DamageAmount);
+
+		Player->TakeDamageFromActor(DamageAmount);
+	}
 }
 
