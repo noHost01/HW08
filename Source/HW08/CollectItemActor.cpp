@@ -57,6 +57,12 @@ void ACollectItemActor::OnItemOverlap(
 		if (GameState)
 		{
 			GameState->AddCollectedCount();
+
+			if (GameState->IsWaveTransitioning())
+			{
+				Destroy();
+				return;
+			}
 		}
 
 		AItemSpawner* SavedSpawner = OwnerSpawner;

@@ -15,32 +15,39 @@ class HW08_API AChaseEnemyActor : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
-	AChaseEnemyActor();
+	public:
+		AChaseEnemyActor();
 
-protected:
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	protected:
+		virtual void BeginPlay() override;
+		virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
-	float MoveSpeed = 250.0f;
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+		float MoveSpeed = 250.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
-	int32 DamageAmount = 10;
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+		int32 DamageAmount = 10;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
-	FVector StartLocation;
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
+		FVector StartLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
-	USphereComponent* DamageCollision;
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy")
+		USphereComponent* DamageCollision;
 
-	UFUNCTION()
-	void OnEnemyOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
+		UFUNCTION()
+		void OnEnemyOverlap(
+			UPrimitiveComponent* OverlappedComponent,
+			AActor* OtherActor,
+			UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex,
+			bool bFromSweep,
+			const FHitResult& SweepResult
+		);
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+		int32 ActiveWave = 1;
+
+	public:
+		void UpdateActiveByWave(int32 CurrentWave);
+		void SetEnemyActive(bool bActive);
 };

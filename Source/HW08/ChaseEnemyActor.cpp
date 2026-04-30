@@ -25,6 +25,10 @@ void AChaseEnemyActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	SetActorTickEnabled(false);
+
 	StartLocation = GetActorLocation();
 
 	DamageCollision->OnComponentBeginOverlap.AddDynamic(this, &AChaseEnemyActor::OnEnemyOverlap);
@@ -60,6 +64,33 @@ void AChaseEnemyActor::OnEnemyOverlap(
 
 		Player->TakeDamageFromActor(DamageAmount);
 
+		SetActorLocation(StartLocation);
+	}
+}
+
+void AChaseEnemyActor::UpdateActiveByWave(int32 CurrentWave)
+{
+	bool bShouldActive = CurrentWave >= ActiveWave;
+	SetEnemyActive(bShouldActive);
+
+	SetActorHiddenInGame(!bShouldActive);
+	SetActorEnableCollision(bShouldActive);
+	SetActorTickEnabled(bShouldActive);
+
+	if (bShouldActive)
+	{
+		SetActorLocation(StartLocation);
+	}
+}
+
+void AChaseEnemyActor::SetEnemyActive(bool bActive)
+{
+	SetActorHiddenInGame(!bActive);
+	SetActorEnableCollision(bActive);
+	SetActorTickEnabled(bActive);
+
+	if (bActive)
+	{
 		SetActorLocation(StartLocation);
 	}
 }

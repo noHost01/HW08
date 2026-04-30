@@ -2,8 +2,9 @@
 
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SurvivalGameState.h"
+#include "ChaseEnemyActor.h"
+#include "Kismet/GameplayStatics.h"
 
 ASurvivalGameState::ASurvivalGameState()
 {
@@ -14,14 +15,30 @@ ASurvivalGameState::ASurvivalGameState()
 
 void ASurvivalGameState::AddCollectedCount()
 {
+	if (bIsWaveTransitioning)
+	{
+		return;
+	}
+
 	CollectedCount++;
 
 	UE_LOG(LogTemp, Warning, TEXT("Collected: %d / %d"), CollectedCount, TargetCollectCount);
 
 	if (IsWaveClear())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Wave %d Clear!"), CurrentWave);
-		StartNextWave();
+		bIsWaveTransitioning = true;
+
+		UE_LOG(LogTemp, Warning, TEXT("Wave %d Clear! Next Wave in 5 seconds..."), CurrentWave);
+
+		SetAllEnemiesActive(false);
+
+		GetWorld()->GetTimerManager().SetTimer(
+			WaveTimerHandle,
+			this,
+			&ASurvivalGameState::BeginNextWave,
+			5.0f,
+			false
+		);
 	}
 }
 
@@ -45,10 +62,63 @@ void ASurvivalGameState::StartNextWave()
 		TargetCollectCount = 15;
 	}
 
+	bIsWaveTransitioning = false;
+
 	UE_LOG(LogTemp, Warning, TEXT("Wave %d Start! Target: %d"), CurrentWave, TargetCollectCount);
+
+	UpdateEnemiesByWave();
 }
 
 bool ASurvivalGameState::IsWaveClear() const
 {
 	return CollectedCount >= TargetCollectCount;
+}
+
+void ASurvivalGameState::UpdateEnemiesByWave()
+{
+	TArray<AActor*> Enemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AChaseEnemyActor::StaticClass(), Enemies);
+
+	for (AActor* Actor : Enemies)
+	{
+		AChaseEnemyActor* Enemy = Cast<AChaseEnemyActor>(Actor);
+
+		if (Enemy)
+		{
+			Enemy->UpdateActiveByWave(CurrentWave);
+		}
+	}
+}
+
+bool ASurvivalGameState::IsWaveTransitioning() const
+{
+	return bIsWaveTransitioning;
+}
+
+void ASurvivalGameState::BeginNextWave()
+{
+	StartNextWave();
+}
+
+void ASurvivalGameState::SetAllEnemiesActive(bool bActive)
+{
+	TArray<AActor*> Enemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AChaseEnemyActor::StaticClass(), Enemies);
+
+	for (AActor* Actor : Enemies)
+	{
+		AChaseEnemyActor* Enemy = Cast<AChaseEnemyActor>(Actor);
+
+		if (Enemy)
+		{
+			Enemy->SetEnemyActive(bActive);
+		}
+	}
+}
+
+void ASurvivalGameState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UpdateEnemiesByWave();
 }
