@@ -25,13 +25,15 @@ void AChaseEnemyActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	StartLocation = GetActorLocation();
+
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+	DamageCollision->OnComponentBeginOverlap.AddDynamic(this, &AChaseEnemyActor::OnEnemyOverlap);
+
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 	SetActorTickEnabled(false);
-
-	StartLocation = GetActorLocation();
-
-	DamageCollision->OnComponentBeginOverlap.AddDynamic(this, &AChaseEnemyActor::OnEnemyOverlap);
 }
 
 void AChaseEnemyActor::Tick(float DeltaTime)
@@ -42,8 +44,16 @@ void AChaseEnemyActor::Tick(float DeltaTime)
 
 	if (PlayerActor)
 	{
-		FVector Direction = (PlayerActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-		AddMovementInput(Direction, 1.0f);
+		FVector Direction = PlayerActor->GetActorLocation() - GetActorLocation();
+		Direction.Z = 0.0f;
+
+		if (!Direction.IsNearlyZero())
+		{
+			FRotator LookRotation = Direction.Rotation();
+			SetActorRotation(LookRotation);
+
+			AddMovementInput(Direction.GetSafeNormal(), 1.0f);
+		}
 	}
 }
 

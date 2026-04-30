@@ -4,6 +4,7 @@
 
 
 #include "SurvivalGameMode.h"
+#include "SurvivalPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 
@@ -20,5 +21,12 @@ void ASurvivalGameMode::GameOver()
 	if (PlayerController)
 	{
 		PlayerController->SetPause(true);
+
+		ASurvivalPlayerController* SPC = Cast<ASurvivalPlayerController>(PlayerController);
+
+		if (SPC)
+		{
+			SPC->ShowGameOverUI();
+		}
 	}
 }

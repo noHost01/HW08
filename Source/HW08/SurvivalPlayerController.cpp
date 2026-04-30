@@ -26,3 +26,25 @@ void ASurvivalPlayerController::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("HUDWidgetClass is not set!"));
 	}
 }
+
+void ASurvivalPlayerController::ShowGameOverUI()
+{
+	if (GameOverWidgetClass)
+	{
+		GameOverWidget = CreateWidget<UUserWidget>(this, GameOverWidgetClass);
+
+		if (GameOverWidget)
+		{
+			GameOverWidget->AddToViewport(100);
+
+			bShowMouseCursor = true;
+
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(GameOverWidget->TakeWidget());
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputMode);
+
+			UE_LOG(LogTemp, Warning, TEXT("GameOver UI Created"));
+		}
+	}
+}

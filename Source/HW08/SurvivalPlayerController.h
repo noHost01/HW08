@@ -13,12 +13,23 @@ class HW08_API ASurvivalPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void BeginPlay() override;
+	public:
+		UFUNCTION(BlueprintCallable, Category = "UI")
+		void ShowGameOverUI();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UUserWidget> HUDWidgetClass;
+	protected:
+		virtual void BeginPlay() override;
 
-	UPROPERTY()
-	UUserWidget* HUDWidget;
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+		TSubclassOf<UUserWidget> HUDWidgetClass;
+
+		UPROPERTY()
+		UUserWidget* HUDWidget;
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+		TSubclassOf<UUserWidget> GameOverWidgetClass;
+
+		UPROPERTY()
+		UUserWidget* GameOverWidget;
 };
+
